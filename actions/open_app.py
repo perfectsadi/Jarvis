@@ -2,6 +2,8 @@ import time
 import subprocess
 import platform
 import shutil
+import os
+import shlex
 
 try:
     import psutil
@@ -12,7 +14,6 @@ except ImportError:
 _SYSTEM = platform.system()
 
 _APP_ALIASES: dict[str, dict[str, str]] = {
-
     "chrome":             {"Windows": "chrome",                  "Darwin": "Google Chrome",        "Linux": "google-chrome"},
     "google chrome":      {"Windows": "chrome",                  "Darwin": "Google Chrome",        "Linux": "google-chrome"},
     "firefox":            {"Windows": "firefox",                 "Darwin": "Firefox",              "Linux": "firefox"},
@@ -22,13 +23,13 @@ _APP_ALIASES: dict[str, dict[str, str]] = {
     "opera":              {"Windows": "opera",                   "Darwin": "Opera",                "Linux": "opera"},
     "whatsapp":           {"Windows": "WhatsApp",                "Darwin": "WhatsApp",             "Linux": "whatsapp"},
     "telegram":           {"Windows": "Telegram",                "Darwin": "Telegram",             "Linux": "telegram"},
-    "discord":            {"Windows": "Discord",                 "Darwin": "Discord",              "Linux": "discord"},
+    "discord":            {"Windows": "Discord",                 "Darwin": "Discord",              "Linux": "flatpak run com.discordapp.Discord"},
     "slack":              {"Windows": "Slack",                   "Darwin": "Slack",                "Linux": "slack"},
     "zoom":               {"Windows": "Zoom",                    "Darwin": "zoom.us",              "Linux": "zoom"},
     "teams":              {"Windows": "msteams",                 "Darwin": "Microsoft Teams",      "Linux": "teams"},
     "skype":              {"Windows": "skype",                   "Darwin": "Skype",                "Linux": "skype"},
     "signal":             {"Windows": "signal",                  "Darwin": "Signal",               "Linux": "signal"},
-    "spotify":            {"Windows": "Spotify",                 "Darwin": "Spotify",              "Linux": "spotify"},
+    "spotify":            {"Windows": "Spotify",                 "Darwin": "Spotify",              "Linux": "flatpak run com.spotify.Client"},
     "vlc":                {"Windows": "vlc",                     "Darwin": "VLC",                  "Linux": "vlc"},
     "netflix":            {"Windows": "Netflix",                 "Darwin": "Netflix",              "Linux": "firefox"},
     "vscode":             {"Windows": "code",                    "Darwin": "Visual Studio Code",   "Linux": "code"},
@@ -77,8 +78,8 @@ def _normalize(raw: str) -> str:
 
     return raw  
 
-def _launch_windows(app_name: str) -> bool:
 
+def _launch_windows(app_name: str) -> bool:
     if shutil.which(app_name) or shutil.which(app_name.split(".")[0]):
         try:
             subprocess.Popen(
@@ -117,7 +118,6 @@ def _launch_windows(app_name: str) -> bool:
 
 
 def _launch_macos(app_name: str) -> bool:
-
     try:
         result = subprocess.run(
             ["open", "-a", app_name],
@@ -169,51 +169,73 @@ def _launch_macos(app_name: str) -> bool:
 
 
 def _launch_linux(app_name: str) -> bool:
+    # 1. Clean up application identifiers for system launching
+    clean_name = app_name.strip()
+    base_binary = shlex.split(clean_name)[0]
+    
+    # Generate variations commonly used in .desktop files (e.g., "google-chrome")
+    variants = [
+        base_binary.lower(),
+        base_binary.lower().replace(" ", "-"),
+        base_binary.lower().replace(" ", ""),
+    ]
 
-    binary = (
-        shutil.which(app_name) or
-        shutil.which(app_name.lower()) or
-        shutil.which(app_name.lower().replace(" ", "-")) or
-        shutil.which(app_name.lower().replace(" ", "_"))
-    )
-    if binary:
+    # 2. STRATEGY A: Try launching via standard Linux Desktop shortcuts (.desktop files)
+    # This is the cleanest way on custom Linux environments to ensure GUI apps load with display variables.
+    for name in variants:
         try:
-            subprocess.Popen(
-                [binary],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
-            time.sleep(1.0)
-            return True
-        except Exception:
-            pass
-
-    try:
-        subprocess.run(
-            ["xdg-open", app_name],
-            capture_output=True, timeout=5
-        )
-        return True
-    except Exception:
-        pass
-
-    for desktop_name in [
-        app_name.lower(),
-        app_name.lower().replace(" ", "-"),
-        app_name.lower().replace(" ", ""),
-    ]:
-        try:
+            # We look for the application desktop launcher
             result = subprocess.run(
-                ["gtk-launch", desktop_name],
-                capture_output=True, timeout=5
+                ["gtk-launch", name],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=3
             )
             if result.returncode == 0:
+                print(f"[open_app] Successfully spawned via gtk-launch: {name}")
                 return True
         except Exception:
             pass
 
-    return False
+    # 3. STRATEGY B: Check explicit binary paths manually using environment variables
+    binary_path = None
+    for name in variants:
+        binary_path = shutil.which(name)
+        if binary_path:
+            break
 
+    # If shutil.which failed, look inside typical local/global execution paths manually
+    if not binary_path:
+        search_dirs = ["/usr/bin", "/bin", "/usr/local/bin", "/var/lib/flatpak/exports/bin"]
+        for directory in search_dirs:
+            for name in variants:
+                full_path = os.path.join(directory, name)
+                if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+                    binary_path = full_path
+                    break
+            if binary_path:
+                break
+
+    # 4. STRATEGY C: Execute via full detached background shell execution string
+    # Passing system env variables helps Wayland/X11 map the application UI correctly.
+    launch_command = clean_name if not binary_path else clean_name.replace(base_binary, binary_path, 1)
+    
+    try:
+        # Appending " &" drops the execution entirely into the Linux subsystem background natively
+        subprocess.Popen(
+            f"{launch_command} &",
+            shell=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            env=os.environ.copy(), 
+            preexec_fn=os.setsid if hasattr(os, 'setsid') else None
+        )
+        time.sleep(1.0)
+        return True
+    except Exception as e:
+        print(f"[open_app] Native background fallback failed: {e}")
+
+    return False
 
 _OS_LAUNCHERS = {
     "Windows": _launch_windows,
