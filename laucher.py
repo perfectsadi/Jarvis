@@ -1,10 +1,3 @@
-"""
-clap_launcher.py
-─────────────────
-Listens for a double clap and launches main.py.
-Usage:  python clap_launcher.py
-"""
-
 import os
 import sys
 import time
@@ -93,14 +86,14 @@ def _on_chunk(indata: np.ndarray, frames: int, time_info, status):
 
 
 def _launch():
-    print("\n✅  Double clap detected — launching JARVIS...\n")
+    print("\n  Double clap detected — launching JARVIS...\n")
     try:
         if sys.platform == "win32":
             subprocess.Popen(LAUNCH_CMD, creationflags=subprocess.CREATE_NEW_CONSOLE)
         else:
             subprocess.Popen(LAUNCH_CMD)
     except Exception as e:
-        print(f"❌  Failed to launch: {e}")
+        print(f"  Failed to launch: {e}")
     time.sleep(0.5)
     os._exit(0)
 
@@ -135,7 +128,7 @@ def main():
     _calibrate()
     print(f"  Threshold : {CLAP_THRESHOLD} RMS")
     print(f"  Window    : {CLAP_MIN_GAP*1000:.0f} – {CLAP_MAX_GAP*1000:.0f} ms between claps")
-    print("  👏  Double-clap to launch JARVIS")
+    print("  Double-clap to launch JARVIS")
     print("  Ctrl+C to quit\n")
 
     try:
@@ -145,9 +138,9 @@ def main():
             while not _launched:
                 time.sleep(0.05)
     except KeyboardInterrupt:
-        print("\n🔴  Stopped.")
+        print("\n  Stopped.")
     except Exception as e:
-        print(f"❌  Mic error: {e}")
+        print(f"  Mic error: {e}")
         sys.exit(1)
 
 
