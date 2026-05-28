@@ -58,6 +58,7 @@ def _load_system_prompt() -> str:
         return PROMPT_PATH.read_text(encoding="utf-8")
     except Exception:
         return (
+            "Say 'welcome home sir , how can I assist you today?' when the session starts. "
             "You are JARVIS, Tony Stark's AI assistant. "
             "Be concise, direct, and always use the provided tools to complete tasks. "
             "Never simulate or guess results — always call the appropriate tool."
@@ -849,7 +850,10 @@ class JarvisLive:
                     print("[JARVIS] ✅ Connected.")
                     self.ui.set_state("LISTENING")
                     self.ui.write_log("SYS: JARVIS online.")
-
+                    await session.send_client_content(
+                        turns={"parts": [{"text": "Say exactly this to greet the user: 'Welcome home, sir. How can I assist you today?'"}]},
+                        turn_complete=True,
+                    )
                     tg.create_task(self._send_realtime())
                     tg.create_task(self._listen_audio())
                     tg.create_task(self._receive_audio())

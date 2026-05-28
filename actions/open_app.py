@@ -14,8 +14,8 @@ except ImportError:
 _SYSTEM = platform.system()
 
 _APP_ALIASES: dict[str, dict[str, str]] = {
-    "chrome":             {"Windows": "chrome",                  "Darwin": "Google Chrome",        "Linux": "google-chrome"},
-    "google chrome":      {"Windows": "chrome",                  "Darwin": "Google Chrome",        "Linux": "google-chrome"},
+    "browser,chrome,google chrome":             {"Windows": "arc",                  "Darwin": "Google Chrome",        "Linux": "google-chrome"},
+    #"google chrome":      {"Windows": "google-chrome",           "Darwin": "Google Chrome",        "Linux": "google-chrome"},
     "firefox":            {"Windows": "firefox",                 "Darwin": "Firefox",              "Linux": "firefox"},
     "edge":               {"Windows": "msedge",                  "Darwin": "Microsoft Edge",       "Linux": "microsoft-edge"},
     "brave":              {"Windows": "brave",                   "Darwin": "Brave Browser",        "Linux": "brave-browser"},
@@ -39,7 +39,7 @@ _APP_ALIASES: dict[str, dict[str, str]] = {
     "cmd":                {"Windows": "cmd.exe",                 "Darwin": "Terminal",             "Linux": "bash"},
     "powershell":         {"Windows": "powershell.exe",          "Darwin": "Terminal",             "Linux": "bash"},
     "postman":            {"Windows": "Postman",                 "Darwin": "Postman",              "Linux": "postman"},
-    "git":                {"Windows": "git-bash",                "Darwin": "Terminal",             "Linux": "bash"},
+    "github":                {"Windows": "GitHub Desktop",                "Darwin": "Terminal",             "Linux": "bash"},
     "figma":              {"Windows": "Figma",                   "Darwin": "Figma",                "Linux": "figma"},
     "blender":            {"Windows": "blender",                 "Darwin": "Blender",              "Linux": "blender"},
     "word":               {"Windows": "winword",                 "Darwin": "Microsoft Word",       "Linux": "libreoffice --writer"},
