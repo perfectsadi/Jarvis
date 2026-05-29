@@ -50,8 +50,8 @@ class C:
 
     # Text
     INK       = "#1a1918"   # near-black main text
-    INK_MED   = "#4a4845"   # medium text
-    INK_DIM   = "#8a8880"   # dim / placeholder
+    INK_MED   = "#474747"   # medium text
+    INK_DIM   = "#707070"   # dim / placeholder
 
     # Animation — bold dark on white
     DARK1     = "#1a1918"   # primary dark (rings, arcs)
@@ -796,11 +796,11 @@ class MainWindow(QMainWindow):
             l = QLabel(txt); l.setFont(QFont("Courier New", 7))
             l.setStyleSheet(f"color: {color}; background: transparent;"); return l
 
-        lay.addWidget(_badge("MARK XXXIX", C.INK_DIM))
+        lay.addWidget(_badge("", C.INK_DIM))
         lay.addStretch()
 
         mid = QVBoxLayout(); mid.setSpacing(1)
-        title = QLabel("J.A.R.V.I.S")
+        title = QLabel("JARVIS")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setFont(QFont("Courier New", 16, QFont.Weight.Black))
         title.setStyleSheet(f"color: {C.INK}; background: transparent; letter-spacing: 5px;")
@@ -918,9 +918,9 @@ class MainWindow(QMainWindow):
 
         lay.addWidget(_fl("[F4] Mute  ·  [F11] Fullscreen"))
         lay.addStretch()
-        lay.addWidget(_fl("FatihMakes Industries  ·  MARK XXXIX  ·  CLASSIFIED"))
+        lay.addWidget(_fl(""))
         lay.addStretch()
-        lay.addWidget(_fl("© FATIHMAKES", C.INK_MED))
+        lay.addWidget(_fl("© Sadi", C.INK_MED))
         return w
 
     # ── Handlers ──────────────────────────────────────────────────────────────
