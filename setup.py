@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-print("Installing requirements modules...")
+print("Installing requirements  modules...")
 subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], check=True)
 
 print("Installing Playwright browsers...")
