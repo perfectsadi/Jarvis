@@ -180,3 +180,4 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 config/api_keys.json
+.vscode/mcp.json
