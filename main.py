@@ -7,7 +7,6 @@ import traceback
 from pathlib import Path
 import os
 print("[ENV]", {k: os.environ.get(k) for k in ("DISPLAY", "WAYLAND_DISPLAY", "XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS")})
-#feel free to commit
 
 import sounddevice as sd
 from google import genai

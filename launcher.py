@@ -20,6 +20,7 @@ CLAP_MAX_GAP   = 0.55   # seconds — max gap for double clap to count
 
 BASE_DIR   = Path(__file__).resolve().parent
 LAUNCH_CMD = [sys.executable, str(BASE_DIR / "main.py")]
+#next workspace launch
 
 
 # ─── Detector ─────────────────────────────────────────────────────────────────
